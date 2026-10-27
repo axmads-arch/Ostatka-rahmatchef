@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ostatka va zakaz</title>
+<style>
+:root{--bg:#f6f3ee;--card:#fff;--tx:#241d17;--mut:#7f7468;--ac:#2f5d8a;--acx:#fff;--ok:#2e7d4f;--bad:#b3392f;--warn:#e0a21b;--bd:#e3dbd0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15181c;--card:#1f242a;--tx:#ecebe8;--mut:#9aa2aa;--ac:#6aa6de;--acx:#10161c;--ok:#6cc08c;--bad:#ef7b70;--warn:#e8b94a;--bd:#323a43;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:10px 14px 50px}
+h1{font-size:19px;margin:0 0 8px}
+h2{font-size:17px;margin:0 0 6px}
+nav{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:4px}
+nav button{white-space:nowrap}
+button{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 13px;border-radius:10px;cursor:pointer}
+button.on,button.p{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+button.d{color:var(--bad);padding:8px 10px}
+#sum{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--ac);color:var(--acx);border-radius:12px;padding:8px 10px;margin-bottom:10px;font-size:13px}
+#sum b{display:block;font-size:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:10px}
+.r{display:grid;gap:6px;margin-bottom:6px;align-items:center}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:end}
+.sp{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 0}
+.mut{color:var(--mut);font-size:13px}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600}
+.pill.out{background:var(--bad);color:#fff}.pill.low{background:var(--warn);color:#241d17}.pill.ok{background:var(--ok);color:#fff}
+input,select,textarea{font:inherit;width:100%;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);min-width:0}
+label{display:block;font-size:12px;color:var(--mut);margin:6px 0 2px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:5px 3px;border-bottom:1px solid var(--bd);text-align:right}
+th:first-child,td:first-child{text-align:left}
+.chip{display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;border-radius:8px;background:var(--bg);border:1px solid var(--bd);font-size:13px}
+.big{font-size:17px;font-weight:700}
+@media print{nav,#sum,.noprint{display:none!important}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<main>
+<h1>📦 Ostatka va zakaz</h1>
+<div id="sum"></div>
+<nav id="nav"></nav>
+<div id="app"></div>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const TODAY=iso(new Date());
+const dd=s=>s.slice(8)+'.'+s.slice(5,7);
+const dayDiff=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5);
+const addD=(s,n)=>{const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);return iso(d)};
+const num=v=>Math.round(v*100)/100;
+const ST={out:'Tugagan',low:'Kam',ok:'Yetarli'};
+const D0='2026-10-26';
+const G=(c,u,s)=>s.split(',').map(x=>{const[i,q]=x.split(':');return[c,i.trim(),u,+q]});
+const SL=[...G('Bar','blok','Gazirovka:4,0.5 l gazsiz suv:8'),...G('Bar','kg','Limon:5,Apelsin:7,Kivi:3,Ko‘k choy:1,Qora choy:1'),...G('Bar','pochka','Karak choy:2,Limonad uchun saboy idish:2,Kichik coffee saboy idish:2,Katta coffee saboy idish:2,Bardak choy:1,Coffee:6'),...G('Bar','bonka','Asal:2'),...G('Bar','dona','Yagodniy sirop:7,Vanil sirop:7,Olma sirop:4,Shaftoli sirop:8,Marakuya sirop:6,Fruktoviy sirop:1,Chocolate sirop:1,Mango sirop:4,Karamel sirop:6,Kivi sirop:5,Tarxun sirop:7,Mojito sirop:7'),...G('Bar','karobka','Shakar:1'),...G('Suv','dona','Qulupnay sok:46,Kakao sok:48,Banan sok:46,Cola:18,Pepsi:28,Fanta:34,Royal:42,Chortoq:32,Shootut:19'),...G('Kassa','dona','Kichkina chek qog‘oz:9,Katta chek qog‘oz:6'),...G('Kassa','pochka','Saboy qoshiq:28'),...G('Kassa','quti','Zvachka:2'),...G('Zal','pochka','Quruq salfetka:3,Shakar:13,Bumaga:3,Elma quruq salfetka:13,Kinder karobka:6'),...G('Zal','dona','Rangli latta:33,Delfin latta:16,Deklafoz:0,Osvejitel:1,Ass:7,Gupta:42,Musor paket:11,Domestos:1,Tort karobka:68'),...G('Zal','quti','Gel:8')];
+const mk=(r,i)=>({id:'p'+i,c:r[0],n:r[1],u:r[2],std:0,s:/idish|sirop|pyure|kapxolder|holder/i.test(r[1])?'Menejer':'Oybek aka',start:r[3],d0:D0});
+const seed=()=>({items:[
+...SL.map(mk)],
+log:{},p:{lead:2,cover:7},cats:['Bar','Suv','Kassa','Zal'],sups:['Menejer','Oybek aka'],reports:{}});
+function fix(d){d.cats=d.cats||['Bar','Suv','Kassa','Zal'];d.sups=d.sups||['Menejer','Oybek aka'];d.reports=d.reports||{};d.items.forEach(x=>{x.c=x.c||d.cats[0];if(!x.s)x.s=/idish|sirop|pyure|kapxolder|holder/i.test(x.n)?'Menejer':'Oybek aka';if(x.std==null)x.std=0})}
+function load(){try{const r=localStorage.getItem('ostatka_v2');if(r){const d=JSON.parse(r);if(d.items&&d.log&&d.p){fix(d);return d}}}catch(e){}return seed()}
+function save(){try{localStorage.setItem('ostatka_v2',JSON.stringify(S))}catch(e){}}
+let S=load(),tab='day',DAY=TODAY,HIST=null,CAT='';
+function ents(it){return Object.keys(S.log).sort().filter(d=>S.log[d][it.id]).map(d=>({d,...S.log[d][it.id]}))}
+function open(it,date){let o=it.start;for(const e of ents(it)){if(e.d>=date)break;if(e.left!=null)o=e.left}return o}
+function stats(it){
+ let pl=it.start,pd=it.d0,pin=0,iv=[],last=null,lastIn=null,zeros=[],ins=[];
+ for(const e of ents(it)){
+  if(e.in){pin+=e.in;lastIn={d:e.d,q:e.in};ins.push(lastIn)}
+  if(e.left!=null){const days=dayDiff(pd,e.d);if(days>0)iv.push({d:e.d,days,use:Math.max(0,pl+pin-e.left)});pl=e.left;pd=e.d;pin=0;last={d:e.d,left:e.left};if(e.left===0)zeros.push(e.d)}
+ }
+ const left=last?last.left:it.start,ref=last?last.d:it.d0;
+ const w=iv.filter(x=>dayDiff(x.d,ref)<=14),td=w.reduce((a,x)=>a+x.days,0),avg=td?w.reduce((a,x)=>a+x.use,0)/td:0;
+ const dl=avg>0?left/avg:null,end=dl!=null?addD(ref,Math.floor(dl)):null;
+ const st=left<=0?'out':(it.min>0&&left<=it.min)?'low':'ok';
+ return{left,avg,dl,end,last,lastIn,zeros,ins,st,ref}
+}
+function need(it,s){return s.left>(it.min||0)?0:Math.max(0,Math.round(((it.std||0)-s.left)*100)/100)}
+function infoHTML(it,s){
+ return `Qoldiq: <b>${num(s.left)} ${esc(it.u)}</b>`+(s.avg>0?` · kuniga ~${num(s.avg)} ${esc(it.u)}`:'')+(s.dl!=null?` · ~${Math.floor(s.dl)} kunga yetadi (${dd(s.end)} gacha)`:'')+(s.lastIn?` · oxirgi kirim: ${dd(s.lastIn.d)} (+${num(s.lastIn.q)})`:'')
+}
+const TABS=[['day','Bugun'],['rep','Ostatka'],['ord','Zakaz'],['his','Tarix'],['itm','Mahsulot'],['bk','Zaxira']];
+function render(){
+ $('#nav').innerHTML=TABS.map(([k,t])=>`<button class="${tab===k?'on':''}" onclick="tab='${k}';render()">${t}</button>`).join('');
+ $('#app').innerHTML=({day:vDay,rep:vRep,ord:vOrd,his:vHis,itm:vItm,bk:vBk})[tab]();upd();
+}
+function upd(){
+ let o=0,l=0,z=0;
+ S.items.forEach(it=>{const s=stats(it);s.st==='out'?o++:s.st==='low'&&l++;if(need(it,s)>0)z++;
+  const e=$('#st'+it.id);if(e){e.className='pill '+s.st;e.textContent=ST[s.st]}
+  const sr=$('#sr'+it.id);if(sr){const en=(S.log[DAY]||{})[it.id]||{};sr.textContent=en.left!=null?num(open(it,DAY)+(en.in||0)-en.left)+' '+it.u:'—'}
+  const fi=$('#fi'+it.id);if(fi)fi.innerHTML=infoHTML(it,s)});
+ $('#sum').innerHTML=`<div>Tugagan<b>${o}</b></div><div>Kam qolgan<b>${l}</b></div><div>Zakaz kerak<b>${z}</b></div>`;
+}
+function setLog(id,k,v){const o=((S.log[DAY]??={})[id]??={});if(v===''||isNaN(+v))delete o[k];else o[k]=+v;if(!Object.keys(o).length)delete S.log[DAY][id];if(!Object.keys(S.log[DAY]).length)delete S.log[DAY];if(S.reports[DAY]||(DAY===TODAY&&late()))snap(DAY);save();upd()}
+function vDay(){
+ return `<div class="card"><div class="sp"><b>Sana</b><div style="display:flex;gap:6px"><input type="date" value="${DAY}" onchange="DAY=this.value||TODAY;render()"><button onclick="DAY=TODAY;render()">Bugun</button></div></div><p class="mut" style="margin:6px 0 0">“Kirim” — shu kuni nima nechta kelgan. “Qoldiq” — hozir sanab chiqqaningiz. Sarf o‘zi hisoblanadi.</p></div>`+
+ catBar()+(S.items.filter(it=>!CAT||it.c===CAT).slice().sort((a,b)=>S.cats.indexOf(a.c)-S.cats.indexOf(b.c)).map(it=>{const en=(S.log[DAY]||{})[it.id]||{};return `<div class="card"><div class="sp"><b>${esc(it.n)}</b><span id="st${it.id}" class="pill ok"></span></div><div class="mut">${esc(it.c)} · Kun boshida: ${num(open(it,DAY))} ${esc(it.u)} · minimum: ${it.min||'—'} · standart: ${it.std||'—'}</div><div class="g3"><div><label>Kirim (${esc(it.u)})</label><input type="number" inputmode="decimal" value="${en.in??''}" oninput="setLog('${it.id}','in',this.value)"></div><div><label>Qoldiq (${esc(it.u)})</label><input type="number" inputmode="decimal" value="${en.left??''}" oninput="setLog('${it.id}','left',this.value)"></div><div><label>Sarf</label><div class="big" id="sr${it.id}">—</div></div></div><div class="mut" id="fi${it.id}" style="margin-top:6px"></div></div>`}).join('')||'<p class="mut">Avval “Mahsulot” bo‘limiga mahsulot qo‘shing.</p>')
+}
+const late=()=>{const t=new Date();return t.getHours()*60+t.getMinutes()>=1230};
+function repText(d){const nx=addD(d,1);return cyr('Ostatka')+' '+dd(d)+' (20:30)'+S.cats.map(c=>{const g=S.items.filter(it=>it.c===c);return g.length?'\n\n'+cyr(c)+':\n'+g.map(it=>'- '+cyr(it.n)+': '+num(open(it,nx))+' '+cyr(it.u)).join('\n'):''}).join('')}
+function snap(d){S.reports[d]=repText(d);save()}
+function vRep(){const sv=DAY<TODAY?S.reports[DAY]:null,txt=sv||repText(DAY),ks=Object.keys(S.reports).sort().reverse().slice(0,14);
+ return `<div class="card"><div class="sp"><b>Sana</b><div style="display:flex;gap:6px"><input type="date" value="${DAY}" onchange="DAY=this.value||TODAY;render()"><button onclick="DAY=TODAY;render()">Bugun</button></div></div><p class="mut" style="margin:6px 0 0">Hisobot kirill alifbosida, bo‘limlar bo‘yicha. Soat 20:30 dan keyin dastur ochilsa yoki qoldiq yozilsa, bugungi hisobot o‘zi saqlanadi. ${sv?'Bu kun uchun saqlangan hisobot ko‘rsatilmoqda.':'Hozirgi holat bo‘yicha.'}</p></div><div class="card"><textarea id="rp" rows="${S.items.length+S.cats.length*3+3}">${esc(txt)}</textarea><div style="margin-top:8px;display:flex;gap:8px"><button class="p" onclick="copyT('rp')">Nusxalash</button><button onclick="snap(DAY);render()">Shu holatni saqlash</button></div></div>`+(ks.length?`<div class="card"><h2>Saqlangan hisobotlar</h2>${ks.map(k=>`<button class="${k===DAY?'on':''}" style="margin:2px" onclick="DAY='${k}';render()">${dd(k)}</button>`).join('')}</div>`:'')}
+function setCat(i){CAT=i<0?'':S.cats[i];render()}
+function catBar(){return `<div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px"><button class="${CAT===''?'on':''}" onclick="setCat(-1)">Hammasi</button>${S.cats.map((c,i)=>`<button class="${CAT===c?'on':''}" onclick="setCat(${i})">${esc(c)}</button>`).join('')}</div>`}
+function addCat(){const n=(prompt('Bo‘lim nomi')||'').trim();if(n&&!S.cats.includes(n)){S.cats.push(n);save();render()}}
+const CW={coffee:'Кофе',cola:'Кола',pepsi:'Пепси',fanta:'Фанта',royal:'Роял',chocolate:'Шоколад',mojito:'Мохито',kinder:'Киндер',domestos:'Доместос',delfin:'Дельфин',zvachka:'Жвачка',kg:'кг',g:'г',l:'л',ml:'мл',pochka:'пачка',bonka:'банка',karobka:'коробка',blok:'блок',dona:'дона',quti:'қути',sirop:'сироп',sok:'сок',gel:'гель'};
+const CD={'o‘':'ў','g‘':'ғ',sh:'ш',ch:'ч',yo:'ё',yu:'ю',ya:'я'};
+const CM={a:'а',b:'б',c:'к',d:'д',e:'е',f:'ф',g:'г',h:'ҳ',i:'и',j:'ж',k:'к',l:'л',m:'м',n:'н',o:'о',p:'п',q:'қ',r:'р',s:'с',t:'т',u:'у',v:'в',w:'в',x:'х',y:'й',z:'з','‘':'ъ'};
+function cyr(s){s=String(s).replace(/[’ʻʼ`']/g,'‘');return s.replace(/[A-Za-z‘]+/g,w=>{const L=w.toLowerCase(),o=CW[L];if(o)return w[0]!==L[0]?o[0].toUpperCase()+o.slice(1):o;let r='';for(let i=0;i<L.length;){const t=L.substr(i,2),n=CD[t]?2:1,c=CD[t]||(i===0&&L[i]==='e'?'э':CM[L[i]]||L[i]),u=w[i]!==L[i];r+=u?c[0].toUpperCase()+c.slice(1):c;i+=n}return r})}
+function supOf(it){return S.sups.includes(it.s)?it.s:S.sups[0]}
+function supOpts(v){return S.sups.map(x=>`<option ${x===v?'selected':''}>${esc(x)}</option>`).join('')}
+function setSup(id,v){S.items.find(i=>i.id===id).s=v;save();render()}
+function addSup(){const n=(prompt('Kimga zakaz qilinadi (ism)')||'').trim();if(n&&!S.sups.includes(n)){S.sups.push(n);save();render()}}
+function copyT(id){const e=$('#'+id);try{navigator.clipboard.writeText(e.value);alert('Nusxalandi')}catch(x){e.select()}}
+function orderText(sp){const l=S.items.map(it=>({it,s:stats(it)})).filter(x=>supOf(x.it)===sp&&need(x.it,x.s)>0);return cyr('Zakaz '+dd(TODAY)+' — '+sp)+(S.cats.map(c=>{const g=l.filter(x=>x.it.c===c);return g.length?'\n\n'+cyr(c)+':\n'+g.map(x=>'- '+cyr(x.it.n)+': '+need(x.it,x.s)+' '+cyr(x.it.u)).join('\n'):''}).join('')||'\n—')}
+function vOrd(){
+ const all=S.items.map(it=>({it,s:stats(it)})),ol=all.filter(x=>need(x.it,x.s)>0),sr=all.slice().sort((a,b)=>(a.s.dl??1e9)-(b.s.dl??1e9));
+ return `<div class="card"><p class="mut" style="margin:0">Qoldiq minimumga tushsa, zakaz = standart − qoldiq. Minimum va standartni “Mahsulot” bo‘limida yozasiz. Har qatorda kimga zakaz qilinishini o‘zgartirsa bo‘ladi. Matn kirill alifbosida chiqadi.</p></div>`+S.sups.map((sp,k)=>{const g=ol.filter(x=>supOf(x.it)===sp);return `<div class="card"><h2>${esc(sp)}</h2>`+(g.length?`<table><tr><th>Mahsulot</th><th>Zakaz</th><th>Kimga</th></tr>${g.map(x=>`<tr><td>${esc(x.it.n)}<div class="mut">${esc(x.it.c)} · qoldiq ${num(x.s.left)} / ${x.it.std}</div></td><td><b>${need(x.it,x.s)} ${esc(x.it.u)}</b></td><td><select style="width:auto;padding:4px" onchange="setSup('${x.it.id}',this.value)">${supOpts(sp)}</select></td></tr>`).join('')}</table><textarea id="ot${k}" rows="${g.length+S.cats.length*2+2}" style="margin-top:10px">${esc(orderText(sp))}</textarea><div style="margin-top:8px"><button class="p" onclick="copyT('ot${k}')">Nusxalash</button></div>`:'<p class="mut">Zakaz yo‘q.</p>')+'</div>'}).join('')+`<div class="card"><h2>Hammasi: qancha kunga yetadi</h2><table><tr><th>Mahsulot</th><th>Qoldiq</th><th>Kunga</th><th>Tugash</th></tr>${sr.map(x=>`<tr><td>${esc(x.it.n)}</td><td>${num(x.s.left)} ${esc(x.it.u)}</td><td>${x.s.dl!=null?Math.floor(x.s.dl):'—'}</td><td>${x.s.end?dd(x.s.end):'—'}</td></tr>`).join('')}</table></div>`
+}
+function vOrdOld(){
+ const all=S.items.map(it=>({it,s:stats(it)})).sort((a,b)=>(a.s.dl??1e9)-(b.s.dl??1e9));
+ const ol=all.filter(x=>x.s.st!=='ok');
+ return `<div class="card"><h2>Sozlama</h2><div class="g3" style="grid-template-columns:1fr 1fr"><div><label>Yetkazish muddati (kun)</label><input type="number" value="${S.p.lead}" onchange="S.p.lead=+this.value;save();render()"></div><div><label>Zakaz necha kunga yetsin</label><input type="number" value="${S.p.cover}" onchange="S.p.cover=+this.value;save();render()"></div></div><p class="mut">Zakaz kerak: qoldiq minimumdan past, yoki yetkazish muddatidan oldin tugaydigan mahsulotlar.</p></div>
+ <div class="card"><h2>Zakaz ro‘yxati</h2>${ol.length?`<table><tr><th>Mahsulot</th><th>Qoldiq</th><th>Zakaz</th></tr>${ol.map(x=>`<tr><td>${esc(x.it.n)} <span class="mut">${esc(x.it.c)}</span> <span class="pill ${x.s.st}">${ST[x.s.st]}</span></td><td>${num(x.s.left)} ${esc(x.it.u)}</td><td><b>${need(x.it,x.s)} ${esc(x.it.u)}</b></td></tr>`).join('')}</table><textarea id="ot" rows="${ol.length+S.cats.length*2+1}" style="margin-top:10px">${esc(orderText())}</textarea><div style="margin-top:8px"><button class="p" onclick="try{navigator.clipboard.writeText($('#ot').value);alert('Nusxalandi')}catch(e){$('#ot').select()}">Nusxalash</button></div>`:'<p class="mut">Hozircha zakaz kerak emas.</p>'}</div>
+ <div class="card"><h2>Hammasi: qancha kunga yetadi</h2><table><tr><th>Mahsulot</th><th>Qoldiq</th><th>Kunga</th><th>Tugash</th></tr>${all.map(x=>`<tr><td>${esc(x.it.n)} <span class="mut">${esc(x.it.c)}</span></td><td>${num(x.s.left)} ${esc(x.it.u)}</td><td>${x.s.dl!=null?Math.floor(x.s.dl):'—'}</td><td>${x.s.end?dd(x.s.end):'—'}</td></tr>`).join('')}</table></div>`
+}
+function vHis(){
+ if(!HIST||!S.items.find(i=>i.id===HIST))HIST=S.items[0]?.id;
+ const it=S.items.find(i=>i.id===HIST);if(!it)return '<p class="mut">Mahsulot yo‘q.</p>';
+ const s=stats(it),es=ents(it).reverse().slice(0,40);
+ return `<div class="card"><select onchange="HIST=this.value;render()">${S.items.map(i=>`<option value="${i.id}" ${i.id===HIST?'selected':''}>${esc(i.c)} · ${esc(i.n)}</option>`).join('')}</select><div style="margin-top:8px" class="mut" id="fi${it.id}"></div></div>
+ <div class="card"><h2>Kirimlar (yangi kelgan sanalar)</h2>${s.ins.length?s.ins.slice().reverse().map(x=>`<span class="chip">${dd(x.d)}: +${num(x.q)} ${esc(it.u)}</span>`).join(''):'<span class="mut">Hali kirim yozilmagan</span>'}</div>
+ <div class="card"><h2>Tugagan kunlar</h2>${s.zeros.length?s.zeros.slice().reverse().map(d=>`<span class="chip">${dd(d)}</span>`).join(''):'<span class="mut">Tugagan kun yo‘q</span>'}</div>
+ <div class="card"><h2>Kunlik yozuvlar</h2><table><tr><th>Sana</th><th>Boshida</th><th>Kirim</th><th>Qoldiq</th><th>Sarf</th></tr>${es.map(e=>`<tr><td>${dd(e.d)}</td><td>${num(open(it,e.d))}</td><td>${e.in!=null?'+'+num(e.in):''}</td><td>${e.left!=null?num(e.left):''}</td><td>${e.left!=null?num(open(it,e.d)+(e.in||0)-e.left):''}</td></tr>`).join('')}</table></div>`
+}
+function stI(n,k,v,isn){S.items[n][k]=isn?+v:v;save();upd()}
+function vItm(){
+ return `<div class="card"><h2>Mahsulotlar</h2><p class="mut">Minimum — qoldiq shunga tushganda zakaz qilinadi. Standart — zakazdan keyin shuncha bo‘lishi kerak (zakaz = standart − qoldiq). “Kimga zakaz” — mahsulotni kim olib keladi.</p>`+S.items.map((it,n)=>`<div style="border-top:1px solid var(--bd);padding:8px 0"><div class="r" style="grid-template-columns:1fr 90px 40px"><input value="${esc(it.n)}" placeholder="Nomi" oninput="stI(${n},'n',this.value)"><select onchange="stI(${n},'c',this.value);render()">${S.cats.map(c=>`<option ${c===it.c?'selected':''}>${esc(c)}</option>`).join('')}</select><button class="d" onclick="delI(${n})">✕</button></div><div class="g3" style="grid-template-columns:1fr 1fr"><div><label>Birlik</label><select onchange="stI(${n},'u',this.value)">${['dona','kg','g','l','ml','blok','pochka','bonka','karobka','quti'].map(u=>`<option ${u===it.u?'selected':''}>${u}</option>`).join('')}</select></div><div><label>Minimum (shunda zakaz)</label><input type="number" inputmode="decimal" value="${it.min||''}" oninput="stI(${n},'min',this.value,1)"></div><div><label>Standart</label><input type="number" inputmode="decimal" value="${it.std||''}" oninput="stI(${n},'std',this.value,1)"></div><div><label>Kimga zakaz</label><select onchange="stI(${n},'s',this.value)">${supOpts(supOf(it))}</select></div></div></div>`).join('')+`<button class="p" onclick="S.items.push({id:'p'+Date.now().toString(36),c:S.cats[0],n:'',u:'dona',min:0,std:0,s:S.sups[1]||S.sups[0],start:0,d0:TODAY});save();render()">+ Mahsulot</button> <button onclick="addCat()">+ Bo‘lim</button> <button onclick="addSup()">+ Kimga</button></div>`
+}
+function delI(n){const it=S.items[n];if(!confirm(it.n+' va uning barcha yozuvlari o‘chirilsinmi?'))return;Object.keys(S.log).forEach(d=>{delete S.log[d][it.id];if(!Object.keys(S.log[d]).length)delete S.log[d]});S.items.splice(n,1);save();render()}
+function vBk(){return `<div class="card"><h2>Zaxira nusxa</h2><p class="mut">Matnni nusxalab saqlab qo‘ying. Ma’lumot faqat shu telefon brauzerida turadi.</p><textarea id="bk" rows="9">${esc(JSON.stringify(S))}</textarea><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="p" onclick="try{navigator.clipboard.writeText($('#bk').value);alert('Nusxalandi')}catch(e){$('#bk').select()}">Nusxalash</button><button onclick="restore()">Tiklash</button><button class="d" onclick="if(confirm('Namuna mahsulotlarni o‘chirib, bo‘sh boshlaysizmi?')){S={items:[],log:{},p:{lead:2,cover:7},cats:['Bar','Suv','Kassa','Zal'],sups:['Menejer','Oybek aka'],reports:{}};save();tab='itm';render()}">Bo‘sh boshlash</button></div></div>`}
+function restore(){try{const d=JSON.parse($('#bk').value);if(!Array.isArray(d.items)||!d.log||!d.p)throw 0;fix(d);S=d;save();alert('Tiklandi');tab='day';render()}catch(e){alert('Noto‘g‘ri format')}}
+if(late())snap(TODAY);
+render();
+</script>
+</body>
+</html>
