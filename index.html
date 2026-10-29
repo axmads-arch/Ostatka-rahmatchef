@@ -83,10 +83,10 @@ function need(it,s){return s.left>(it.min||0)?0:Math.max(0,Math.round(((it.std||
 function infoHTML(it,s){
  return `Qoldiq: <b>${num(s.left)} ${esc(it.u)}</b>`+(s.avg>0?` · kuniga ~${num(s.avg)} ${esc(it.u)}`:'')+(s.dl!=null?` · ~${Math.floor(s.dl)} kunga yetadi (${dd(s.end)} gacha)`:'')+(s.lastIn?` · oxirgi kirim: ${dd(s.lastIn.d)} (+${num(s.lastIn.q)})`:'')
 }
-const TABS=[['day','Bugun'],['rep','Ostatka'],['ord','Zakaz'],['his','Tarix'],['itm','Mahsulot'],['bk','Zaxira']];
+const TABS=[['day','Bugun'],['rep','Ostatka'],['ord','Zakaz'],['boz','Bozor'],['his','Tarix'],['itm','Mahsulot'],['bk','Zaxira']];
 function render(){
  $('#nav').innerHTML=TABS.map(([k,t])=>`<button class="${tab===k?'on':''}" onclick="tab='${k}';render()">${t}</button>`).join('');
- $('#app').innerHTML=({day:vDay,rep:vRep,ord:vOrd,his:vHis,itm:vItm,bk:vBk})[tab]();upd();
+ $('#app').innerHTML=({day:vDay,rep:vRep,ord:vOrd,boz:vBoz,his:vHis,itm:vItm,bk:vBk})[tab]();upd();
 }
 function upd(){
  let o=0,l=0,z=0;
@@ -106,6 +106,12 @@ function repText(d){const nx=addD(d,1);return cyr('Ostatka')+' '+dd(d)+' (20:30)
 function snap(d){S.reports[d]=repText(d);save()}
 function vRep(){const sv=DAY<TODAY?S.reports[DAY]:null,txt=sv||repText(DAY),ks=Object.keys(S.reports).sort().reverse().slice(0,14);
  return `<div class="card"><div class="sp"><b>Sana</b><div style="display:flex;gap:6px"><input type="date" value="${DAY}" onchange="DAY=this.value||TODAY;render()"><button onclick="DAY=TODAY;render()">Bugun</button></div></div><p class="mut" style="margin:6px 0 0">Hisobot kirill alifbosida, bo‘limlar bo‘yicha. Soat 20:30 dan keyin dastur ochilsa yoki qoldiq yozilsa, bugungi hisobot o‘zi saqlanadi. ${sv?'Bu kun uchun saqlangan hisobot ko‘rsatilmoqda.':'Hozirgi holat bo‘yicha.'}</p></div><div class="card"><textarea id="rp" rows="${S.items.length+S.cats.length*3+3}">${esc(txt)}</textarea><div style="margin-top:8px;display:flex;gap:8px"><button class="p" onclick="copyT('rp')">Nusxalash</button><button onclick="snap(DAY);render()">Shu holatni saqlash</button></div></div>`+(ks.length?`<div class="card"><h2>Saqlangan hisobotlar</h2>${ks.map(k=>`<button class="${k===DAY?'on':''}" style="margin:2px" onclick="DAY='${k}';render()">${dd(k)}</button>`).join('')}</div>`:'')}
+function bozor(){const r={z:[],b:[],p:[]};S.items.forEach(it=>{const s=stats(it);let k=null;if(s.left<=0)k='z';else if(s.dl!=null&&s.dl<1)k='b';else if(s.st==='low'||(s.dl!=null&&s.dl<=3&&s.left<(it.std||0)))k='p';if(k)r[k].push({it,s})});return r}
+function bq(it,s){const q=Math.round(((it.std||0)-s.left)*100)/100;return q>0&&it.std>0?q:0}
+function bLine(x){const q=bq(x.it,x.s);return cyr(x.it.n)+': '+(q?q+' '+cyr(x.it.u):'қолган '+num(x.s.left)+' '+cyr(x.it.u))}
+function bozorText(r){return 'Бозор '+dd(TODAY)+[['Зарур','z'],['Бугунга етарли','b'],['Пул қолса','p']].map(([h,k])=>r[k].length?'\n\n'+h+':\n'+r[k].map(bLine).join('\n'):'').join('')}
+function vBoz(){const r=bozor(),T=[['Zarur — qolmagan, hozir kerak','z'],['Bugunga yetarli — ertagacha yetmaydi','b'],['Pul qolsa — 2-3 kunga yetadi, lekin kam','p']];
+ return `<div class="card"><p class="mut" style="margin:0">Ro‘yxat qoldiq va o‘rtacha sarfdan o‘zi tuziladi. Miqdor = standart − qoldiq (standart yozilmagan bo‘lsa, qoldiq ko‘rsatiladi). Sarf hisobi kamida 2 kunlik yozuvdan keyin chiqadi.</p></div>`+T.map(([h,k])=>`<div class="card"><h2>${h}</h2>${r[k].length?`<table>${r[k].map(x=>`<tr><td>${esc(x.it.n)}<div class="mut">${esc(x.it.c)} · qoldiq ${num(x.s.left)} ${esc(x.it.u)}${x.s.dl!=null?' · ~'+Math.floor(x.s.dl)+' kun':''}</div></td><td><b>${bq(x.it,x.s)?bq(x.it,x.s)+' '+esc(x.it.u):'—'}</b></td></tr>`).join('')}</table>`:'<p class="mut">Bo‘sh.</p>'}</div>`).join('')+`<div class="card"><h2>Matn (kirill)</h2><textarea id="bz" rows="${r.z.length+r.b.length+r.p.length+9}">${esc(bozorText(r))}</textarea><div style="margin-top:8px"><button class="p" onclick="copyT('bz')">Nusxalash</button></div></div>`}
 function setCat(i){CAT=i<0?'':S.cats[i];render()}
 function catBar(){return `<div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:10px"><button class="${CAT===''?'on':''}" onclick="setCat(-1)">Hammasi</button>${S.cats.map((c,i)=>`<button class="${CAT===c?'on':''}" onclick="setCat(${i})">${esc(c)}</button>`).join('')}</div>`}
 function addCat(){const n=(prompt('Bo‘lim nomi')||'').trim();if(n&&!S.cats.includes(n)){S.cats.push(n);save();render()}}
